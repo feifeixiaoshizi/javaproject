@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile files('libs/spring-aop-4.3.9.RELEASE.jar')
+    compile files('libs/spring-aspects-4.3.9.RELEASE.jar')
+    compile files('libs/aopalliance-1.0.jar')
+    compile files('libs/asm-3.3.1.jar')
+    compile files('libs/aspectjweaver-1.6.11.jar')
+    compile files('libs/cglib-2.2.2.jar')
+    compile files('libs/javassist-3.17.1-GA.jar')
+    compile files('libs/spring-beans-4.3.9.RELEASE.jar')
+    compile files('libs/spring-context-4.3.9.RELEASE.jar')
+    compile files('libs/spring-context-support-4.3.9.RELEASE.jar')
+    compile files('libs/spring-core-4.3.9.RELEASE.jar')
+    compile files('libs/spring-expression-4.3.9.RELEASE.jar')
+    compile files('libs/spring-oxm-4.3.9.RELEASE.jar')
+    compile files('libs/spring-test-4.3.9.RELEASE.jar')
+    compile files('libs/spring-tx-4.3.9.RELEASE.jar')
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
