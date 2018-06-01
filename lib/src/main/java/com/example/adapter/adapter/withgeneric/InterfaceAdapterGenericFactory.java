@@ -34,6 +34,11 @@ import com.example.adapter.adapter.interfaces.ITeach;
  *      4：容器中的元素是有继承关系的，但是容器与容器之间的继承的关系是通过extends来实现的，List<? extends Person>就可以接受
  *      List<Student>容器，但是List<Person>就不可以接受List<Student>容器。
  *
+ *     我需要一个能装下动物的容器，你就不能给我一个只能装下猫的容器，因为我可能还要装下狗，但是我可在装动物的容器里面装各种动物。（***）
+ *
+ *     泛型：从整理上理解和从具体类型上看。（重要）
+ *
+ *
  *
  *
  */
