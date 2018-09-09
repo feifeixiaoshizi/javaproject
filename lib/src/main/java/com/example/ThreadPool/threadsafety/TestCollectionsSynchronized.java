@@ -36,6 +36,11 @@ import java.util.List;
  * 同步关键字
  * 锁
  * final+构造方法
+ *
+ *
+ * 使用Collections.synchronizedList（）方法后，遍历时可能会出错。
+ *
+ *
  */
 
 public class TestCollectionsSynchronized {
@@ -53,12 +58,16 @@ public class TestCollectionsSynchronized {
             synchronizedList.add(i);
         }
         //测试安全删除和安全读取
-        testSafeRead();
-        testSafeRemove();
+        //testSafeRead();
+        //testSafeRemove();
 
         //测试删除和读取
         //testRead();
         //testRemove();
+
+        //测试迭代器
+        testIteratorRead();
+        testIteratorRemove();
 
         Thread.currentThread().sleep(90000);
         System.out.println("synchronizedList " + synchronizedList.size());//100000 永远都是100000是线程安全的。
@@ -183,6 +192,81 @@ public class TestCollectionsSynchronized {
             }
         }
     }
+
+
+
+
+    /*-----------------------------------------测试迭代器---------------------------------*/
+
+
+
+    private static void testIteratorRead(){
+        //读取数据的线程
+        new Thread(new ReadIteratorRunnable()).start();
+        new Thread(new ReadIteratorRunnable()).start();
+        new Thread(new ReadIteratorRunnable()).start();
+        new Thread(new ReadIteratorRunnable()).start();
+        new Thread(new ReadIteratorRunnable()).start();
+        new Thread(new ReadIteratorRunnable()).start();
+
+
+    }
+
+
+    private  static void testIteratorRemove(){
+        //删除数据的线程
+        new Thread(new RemoveIteratorRunnalbe()).start();
+
+    }
+
+    static class ReadIteratorRunnable implements Runnable {
+
+        @Override
+        public void run() {
+
+
+            /*
+
+    迭代器使用时发生错误：
+    java.util.ConcurrentModificationException
+	at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:903)
+	at java.util.ArrayList$Itr.next(ArrayList.java:853)
+	at com.example.ThreadPool.threadsafety.TestCollectionsSynchronized$ReadIteratorRunnable.run(TestCollectionsSynchronized.java:227)
+	at java.lang.Thread.run(Thread.java:745)*/
+
+            for(Object integer : synchronizedList){
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //线程安全
+                System.out.println("read:" + integer);
+            }
+
+
+        }
+    }
+
+    static class RemoveIteratorRunnalbe implements Runnable {
+        @Override
+        public void run() {
+            try {
+                Thread.currentThread().sleep(10000);
+                synchronizedList.clear();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+
+
+
+
 
 
 }
