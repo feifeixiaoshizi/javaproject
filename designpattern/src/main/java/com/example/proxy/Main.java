@@ -1,7 +1,5 @@
 package com.example.proxy;
 
-
-
 import com.example.proxy.interfaces.ITeach;
 import com.example.proxy.interfaces.RealTeach;
 import com.example.proxy.invokers.RealTeachInvocation;

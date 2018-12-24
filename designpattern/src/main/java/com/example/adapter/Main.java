@@ -9,9 +9,7 @@ import com.example.adapter.adapter.withmethod.InterfaceAdapterFactory;
 import com.example.adapter.adapter.withouttype.IAdapter;
 import com.example.adapter.adapter.withouttype.IAdapterImpl;
 import com.example.adapter.adapter.interfaces.IStudy;
-import com.sun.org.apache.bcel.internal.generic.ISUB;
 
-import java.util.List;
 
 /**
  * Created by Administrator on 2017/12/19 0019.
