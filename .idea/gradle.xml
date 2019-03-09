@@ -11,6 +11,8 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/designpattern" />
             <option value="$PROJECT_DIR$/okhttpcode" />
+            <option value="$PROJECT_DIR$/retrofit" />
+            <option value="$PROJECT_DIR$/retrofit2" />
             <option value="$PROJECT_DIR$/rxjava" />
             <option value="$PROJECT_DIR$/testjava" />
           </set>

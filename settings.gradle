@@ -1,1 +1,1 @@
-include ':app', ':designpattern', ':testjava', ':okhttpcode', ':rxjava'
+include ':app', ':designpattern', ':testjava', ':okhttpcode', ':rxjava', ':retrofit2', ':retrofit'
