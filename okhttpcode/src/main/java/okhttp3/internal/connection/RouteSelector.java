@@ -36,6 +36,8 @@ import okhttp3.internal.Util;
 /**
  * Selects routes to connect to an origin server. Each connection requires a choice of proxy server,
  * IP address, and TLS mode. Connections may also be recycled.
+ * 路由转化的过程：
+ * Address-->RouteSelctor --->List<Proxy>---->List<InetSocketAddress> -->List<Route>-->Selection
  */
 public final class RouteSelector {
   private final Address address;
@@ -60,6 +62,7 @@ public final class RouteSelector {
     this.call = call;
     this.eventListener = eventListener;
 
+    //如果没有设置过Proxy，默认address.proxy()的值为null。
     resetNextProxy(address.url(), address.proxy());
   }
 
@@ -126,6 +129,7 @@ public final class RouteSelector {
       proxies = Collections.singletonList(proxy);
     } else {
       // Try each of the ProxySelector choices until one connection succeeds.
+      //默认是一个DefaultProxySelector
       List<Proxy> proxiesOrNull = address.proxySelector().select(url.uri());
       proxies = proxiesOrNull != null && !proxiesOrNull.isEmpty()
           ? Util.immutableList(proxiesOrNull)
@@ -176,12 +180,14 @@ public final class RouteSelector {
           + "; port is out of range");
     }
 
+    //如果是Sockt类型，则直接创建InetSocktAddress对象
     if (proxy.type() == Proxy.Type.SOCKS) {
       inetSocketAddresses.add(InetSocketAddress.createUnresolved(socketHost, socketPort));
     } else {
       eventListener.dnsStart(call, socketHost);
 
       // Try each address for best behavior in mixed IPv4/IPv6 environments.
+      //如果是http则通过DNS获取InetAddress
       List<InetAddress> addresses = address.dns().lookup(socketHost);
       if (addresses.isEmpty()) {
         throw new UnknownHostException(address.dns() + " returned no addresses for " + socketHost);

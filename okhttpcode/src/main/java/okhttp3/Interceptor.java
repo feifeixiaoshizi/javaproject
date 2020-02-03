@@ -25,11 +25,32 @@ import javax.annotation.Nullable;
  * or response.
  */
 public interface Interceptor {
+  /**
+   * 拦截器的核心代码，入参是个封装的对象，返回值是一个响应值。
+   * @param chain 拦截器的链子，负责组合拦截器和传递拦截器。
+   * @return
+   * @throws IOException
+   *
+   * Chain和Interceptor的关联关系仅仅是一个方法参数对象，降低了Chain和Interceptor的耦合性（******）
+   */
   Response intercept(Chain chain) throws IOException;
 
+  /**
+   * 拦截器的内部接口，负责管理拦截器，把拦截器链接起来
+   */
   interface Chain {
+    /***
+     *封装Request
+     * @return
+     */
     Request request();
 
+    /**
+     * 核心代码，负责传递拦截器
+     * @param request
+     * @return
+     * @throws IOException
+     */
     Response proceed(Request request) throws IOException;
 
     /**

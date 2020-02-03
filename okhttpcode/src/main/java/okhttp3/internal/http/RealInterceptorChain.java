@@ -34,17 +34,17 @@ import static okhttp3.internal.Util.checkDuration;
  * interceptors, the OkHttp core, all network interceptors, and finally the network caller.
  */
 public final class RealInterceptorChain implements Interceptor.Chain {
-  private final List<Interceptor> interceptors;
-  private final StreamAllocation streamAllocation;
-  private final HttpCodec httpCodec;
-  private final RealConnection connection;
+  private final List<Interceptor> interceptors;//拦截器（RealCall中创建）
+  private final StreamAllocation streamAllocation;//流的管理器（RetryAndFollowUpInterceptor中创建）
+  private final HttpCodec httpCodec;//http的编码和解码对象（ConnectInterceptor中创建）
+  private final RealConnection connection;//连接对象（ConnectInterceptor中创建）
   private final int index;
-  private final Request request;
-  private final Call call;
-  private final EventListener eventListener;
-  private final int connectTimeout;
-  private final int readTimeout;
-  private final int writeTimeout;
+  private final Request request;//RealCall中创建
+  private final Call call;//RealCall中创建
+  private final EventListener eventListener;//RealCall中创建
+  private final int connectTimeout;//RealCall中创建
+  private final int readTimeout;//RealCall中创建
+  private final int writeTimeout;//RealCall中创建
   private int calls;
 
   public RealInterceptorChain(List<Interceptor> interceptors, StreamAllocation streamAllocation,

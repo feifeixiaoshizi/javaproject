@@ -91,8 +91,8 @@ public final class RealConnection extends Http2Connection.Listener implements Co
   private Handshake handshake;
   private Protocol protocol;
   private Http2Connection http2Connection;
-  private BufferedSource source;
-  private BufferedSink sink;
+  private BufferedSource source;//服务器发送给客户端的缓冲流inputStream
+  private BufferedSink sink;//发送给服务区的缓冲流，封装了socket的outputStream
 
   // The fields below track connection state and are guarded by connectionPool.
 
@@ -247,7 +247,9 @@ public final class RealConnection extends Http2Connection.Listener implements Co
     // https://github.com/square/okhttp/issues/3245
     // https://android-review.googlesource.com/#/c/271775/
     try {
+      //获取Socket的InputStream用于从服务端读取数据
       source = Okio.buffer(Okio.source(rawSocket));
+      //获取Socket的OutputStream用于向服务端发送数据
       sink = Okio.buffer(Okio.sink(rawSocket));
     } catch (NullPointerException npe) {
       if (NPE_THROW_WITH_NULL.equals(npe.getMessage())) {

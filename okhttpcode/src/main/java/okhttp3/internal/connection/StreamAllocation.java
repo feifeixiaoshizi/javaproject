@@ -74,23 +74,29 @@ import static okhttp3.internal.Util.closeQuietly;
  * but not the other streams sharing its connection. But if the TLS handshake is still in progress
  * then canceling may break the entire connection.
  */
+
+/**
+ * 1.负责管理Connect的创建和流的创建
+ * 2.负责地址
+ */
 public final class StreamAllocation {
-  public final Address address;
+  public final Address address;//地址
   private RouteSelector.Selection routeSelection;
-  private Route route;
-  private final ConnectionPool connectionPool;
-  public final Call call;
+  private Route route;//路由
+  //是okhttpClient中提供的对象，一个OkhttpClient一个ConnectionPool对象。
+  private final ConnectionPool connectionPool;//连接缓存池
+  public final Call call;//请求
   public final EventListener eventListener;
   private final Object callStackTrace;
 
   // State guarded by connectionPool.
-  private final RouteSelector routeSelector;
+  private final RouteSelector routeSelector;//创建一个RouteSelector
   private int refusedStreamCount;
-  private RealConnection connection;
+  private RealConnection connection;//连接对象
   private boolean reportedAcquired;
   private boolean released;
   private boolean canceled;
-  private HttpCodec codec;
+  private HttpCodec codec;//http的编码和解码
 
   public StreamAllocation(ConnectionPool connectionPool, Address address, Call call,
       EventListener eventListener, Object callStackTrace) {
@@ -102,6 +108,13 @@ public final class StreamAllocation {
     this.callStackTrace = callStackTrace;
   }
 
+  /**
+   * 先创建socket连接，在根据socket的中的流来创建流
+   * @param client
+   * @param chain
+   * @param doExtensiveHealthChecks
+   * @return
+   */
   public HttpCodec newStream(
       OkHttpClient client, Interceptor.Chain chain, boolean doExtensiveHealthChecks) {
     int connectTimeout = chain.connectTimeoutMillis();
@@ -110,8 +123,10 @@ public final class StreamAllocation {
     boolean connectionRetryEnabled = client.retryOnConnectionFailure();
 
     try {
+      //创建socket连接
       RealConnection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
           writeTimeout, connectionRetryEnabled, doExtensiveHealthChecks);
+      //根据socket连接创建流
       HttpCodec resultCodec = resultConnection.newCodec(client, chain, this);
 
       synchronized (connectionPool) {
@@ -184,7 +199,9 @@ public final class StreamAllocation {
 
       if (result == null) {
         // Attempt to get a connection from the pool.
+        //从连接池里取出一个连接
         Internal.instance.get(connectionPool, address, this, null);
+        //如果不为null则表示使用缓存的连接
         if (connection != null) {
           foundPooledConnection = true;
           result = connection;
@@ -193,6 +210,7 @@ public final class StreamAllocation {
         }
       }
     }
+    //关闭socket连接
     closeQuietly(toClose);
 
     if (releasedConnection != null) {
@@ -222,6 +240,7 @@ public final class StreamAllocation {
         List<Route> routes = routeSelection.getAll();
         for (int i = 0, size = routes.size(); i < size; i++) {
           Route route = routes.get(i);
+          //比较address和那个route匹配的上，匹配上就获取connection
           Internal.instance.get(connectionPool, address, this, route);
           if (connection != null) {
             foundPooledConnection = true;
@@ -241,6 +260,7 @@ public final class StreamAllocation {
         // for an asynchronous cancel() to interrupt the handshake we're about to do.
         route = selectedRoute;
         refusedStreamCount = 0;
+        //缓存中没有找到合适的Connection就直接创建一个connection对象。
         result = new RealConnection(connectionPool, selectedRoute);
         acquire(result, false);
       }
@@ -253,6 +273,8 @@ public final class StreamAllocation {
     }
 
     // Do TCP + TLS handshakes. This is a blocking operation.
+    //传输层安全性协议（英语：Transport Layer Security，缩写作TLS），及其前身安全套接层（Secure Sockets Layer，缩写作SSL）是一种安全协议，
+    //真正的开始建立socket通道，Connection就是负责建立socket通道，然后发送信息给服务器。
     result.connect(
         connectTimeout, readTimeout, writeTimeout, connectionRetryEnabled, call, eventListener);
     routeDatabase().connected(result.route());
@@ -261,7 +283,7 @@ public final class StreamAllocation {
     synchronized (connectionPool) {
       reportedAcquired = true;
 
-      // Pool the connection.
+      // Pool the connection. 连接入池
       Internal.instance.put(connectionPool, result);
 
       // If another multiplexed connection to the same address was created concurrently, then

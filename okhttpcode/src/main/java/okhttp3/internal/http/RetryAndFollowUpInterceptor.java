@@ -56,6 +56,14 @@ import static okhttp3.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
 /**
  * This interceptor recovers from failures and follows redirects as necessary. It may throw an
  * {@link IOException} if the call was canceled.
+ * 从这个名字可见，这个拦截器负责两部分功能，retry和followup。
+ * retry即重试，当一个请求进来，它会首先扔给后面的环节处理，当它下游的环节都搞不定，请求失败并抛出异常，这时候由这一环负责决定是否再来一次，
+ * 判断是否重试的条件主要在RetryAndFollowUpInterceptor类的recover方法，细节可以参考源码。
+ *
+ *
+ * followup功能在RetryAndFollowUpInterceptor的followup方法中，主要是检查response的返回码，
+ * 根据返回码采取相应措施，比如代理验证、重定向、请求超时等。
+ *
  */
 public final class RetryAndFollowUpInterceptor implements Interceptor {
   /**
@@ -66,7 +74,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
 
   private final OkHttpClient client;
   private final boolean forWebSocket;
-  private StreamAllocation streamAllocation;
+  private StreamAllocation streamAllocation;//创建StreamAllocation负责管理流的分配
   private Object callStackTrace;
   private volatile boolean canceled;
 
@@ -102,7 +110,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
     return streamAllocation;
   }
 
-  @Override public Response intercept(Chain chain) throws IOException {
+  @Override public Response  intercept(Chain chain) throws IOException {
     Request request = chain.request();
     RealInterceptorChain realChain = (RealInterceptorChain) chain;
     Call call = realChain.call();
@@ -199,6 +207,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       certificatePinner = client.certificatePinner();
     }
 
+    //创建一个Address
     return new Address(url.host(), url.port(), client.dns(), client.socketFactory(),
         sslSocketFactory, hostnameVerifier, certificatePinner, client.proxyAuthenticator(),
         client.proxy(), client.protocols(), client.connectionSpecs(), client.proxySelector());
